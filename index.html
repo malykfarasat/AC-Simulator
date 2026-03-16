@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0D1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AC Simulator">
+<meta name="description" content="The ultimate AC simulator game. Cool your room, collect ACs, earn coins!">
+<title>AC Simulator ❄️</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D1117;--s1:#161B22;--s2:#21262D;--s3:#30363D;--ln:#21262D;--ln2:#30363D;--cyan:#00D4FF;--cyan-bg:#0D2030;--cyan-dim:rgba(0,212,255,.12);--green:#3FB950;--green-bg:#0A1F0D;--red:#EF476F;--red-bg:#200A10;--amber:#F0B429;--amber-bg:#1A1200;--purple:#BC8CFF;--t1:#E6EDF3;--t2:#C9D1D9;--t3:#8B949E;--t4:#484F58;--mono:'Share Tech Mono',monospace;--sans:'Nunito',sans-serif;--r:14px;--r2:10px;--nav-h:64px;--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:15px;line-height:1.5;height:100%;overflow:hidden;-webkit-font-smoothing:antialiased;padding-top:var(--safe-top)}
+button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:inherit}
+#app{display:flex;flex-direction:column;height:100%;height:100dvh;position:relative;overflow:hidden}
+.screen{display:none;flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + var(--safe-bot) + 8px);-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{display:flex;flex-direction:column;animation:fadeUp .25s ease both}
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;height:calc(var(--nav-h) + var(--safe-bot));padding-bottom:var(--safe-bot);background:rgba(13,17,23,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--ln);display:flex}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--t4);transition:color .2s;padding:0 4px}
+.nav-btn .ni{font-size:20px;line-height:1;transition:transform .2s}
+.nav-btn.on{color:var(--cyan)}
+.nav-btn.on .ni{transform:scale(1.1);filter:drop-shadow(0 0 6px rgba(0,212,255,.6))}
+.card{background:var(--s1);border:1px solid var(--ln);border-radius:var(--r);padding:16px;margin:0 16px 10px}
+.card.accent{border-color:rgba(0,212,255,.25);background:var(--cyan-bg)}
+.page-header{padding:16px 16px 8px;padding-top:calc(16px + var(--safe-top));display:flex;align-items:center;justify-content:space-between}
+.page-title{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.page-sub{font-size:12px;color:var(--t3)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.04em}
+.pill-cyan{background:var(--cyan-dim);color:var(--cyan);border:1px solid rgba(0,212,255,.2)}
+.pill-amber{background:rgba(240,180,41,.1);color:var(--amber);border:1px solid rgba(240,180,41,.2)}
+.pill-green{background:rgba(63,185,80,.12);color:var(--green);border:1px solid rgba(63,185,80,.2)}
+.pill-gray{background:rgba(139,148,158,.1);color:var(--t3);border:1px solid var(--ln)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 24px;border-radius:100px;font-size:14px;font-weight:800;letter-spacing:.04em;transition:transform .1s;cursor:pointer}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--cyan);color:#000}
+.btn-secondary{background:var(--s2);color:var(--t2);border:1px solid var(--ln2)}
+.btn-full{width:100%}
+.prog-track{height:6px;background:var(--s2);border-radius:100px;overflow:hidden}
+.prog-fill{height:100%;border-radius:100px;transition:width .5s ease;background:var(--cyan)}
+.tog{width:44px;height:24px;border-radius:100px;background:var(--s3);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;border:none}
+.tog.on{background:var(--cyan)}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s}
+.tog.on::after{transform:translateX(20px)}
+.div{height:1px;background:var(--ln);margin:12px 16px}
+.row{display:flex;align-items:center;gap:10px}
+.row-between{display:flex;align-items:center;justify-content:space-between}
+/* SPLASH */
+#splash{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s ease}
+#splash.hide{opacity:0;pointer-events:none}
+.splash-icon{font-size:80px;line-height:1;margin-bottom:20px;animation:splashPulse 1.5s ease infinite}
+.splash-title{font-family:var(--mono);font-size:28px;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.splash-sub{font-size:14px;color:var(--t3);margin-bottom:48px}
+.splash-bar-track{width:200px;height:3px;background:var(--s2);border-radius:100px;overflow:hidden}
+.splash-bar-fill{height:100%;width:0%;border-radius:100px;background:linear-gradient(90deg,var(--cyan),var(--green));box-shadow:0 0 8px rgba(0,212,255,.5)}
+.splash-ver{font-size:11px;color:var(--t4);margin-top:8px}
+/* INSTALL BANNER */
+#install-banner{display:none;background:var(--cyan-bg);border-bottom:1px solid rgba(0,212,255,.2);padding:12px 16px;flex-direction:row;align-items:center;gap:10px}
+#install-banner.show{display:flex}
+/* GAME SCREEN */
+#game-screen{padding-bottom:0}
+#room-panel{position:relative;height:220px;flex-shrink:0;background:var(--bg);overflow:hidden;transition:background-color .8s ease;border-bottom:1px solid var(--ln)}
+#room-top-bar{position:absolute;top:0;left:0;right:0;padding-top:var(--safe-top);padding-left:8px;padding-right:12px;height:calc(52px + var(--safe-top));display:flex;align-items:center;gap:8px;background:linear-gradient(to bottom,rgba(13,17,23,.9),transparent);z-index:2}
+#room-model-name{flex:1;font-size:14px;font-weight:700;color:var(--t1);text-align:center}
+#elec-badge{font-family:var(--mono);font-size:11px;color:var(--cyan);background:var(--cyan-dim);border:1px solid rgba(0,212,255,.2);border-radius:6px;padding:4px 8px}
+#room-temp-display{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) translateY(10px);text-align:center;z-index:1}
+#room-temp-big{font-family:var(--mono);font-size:72px;font-weight:400;color:var(--t1);line-height:1}
+#room-temp-unit{font-family:var(--mono);font-size:22px;color:var(--t3);vertical-align:super}
+#feels-like{font-size:12px;color:var(--t3);margin-top:4px;text-align:center}
+.airflow-line{position:absolute;top:60px;width:2px;height:80px;background:linear-gradient(to bottom,rgba(0,212,255,.4),transparent);border-radius:1px;animation:airflow 1.5s ease-in-out infinite;display:none}
+.airflow-line:nth-child(1){left:calc(50% - 60px);animation-delay:0s}
+.airflow-line:nth-child(2){left:calc(50% - 20px);animation-delay:.3s}
+.airflow-line:nth-child(3){left:calc(50% + 20px);animation-delay:.6s}
+.airflow-line:nth-child(4){left:calc(50% + 60px);animation-delay:.9s}
+.airflow-line.show{display:block}
+#game-controls{flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + var(--safe-bot) + 8px);scrollbar-width:none}
+#game-controls::-webkit-scrollbar{display:none}
+#power-temp-card{margin:12px 16px 10px;background:var(--s1);border:1px solid var(--ln);border-radius:var(--r);padding:16px;display:flex;align-items:center}
+#power-btn{width:72px;height:72px;border-radius:50%;background:var(--red-bg);border:2px solid var(--red);font-size:28px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .25s}
+#power-btn.on{background:var(--cyan-bg);border-color:var(--cyan);animation:powerGlow 2s ease infinite}
+#vdiv{width:1px;height:60px;background:var(--ln);margin:0 16px;flex-shrink:0}
+#temp-control{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}
+#temp-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+#temp-row{display:flex;align-items:center}
+#btn-temp-down,#btn-temp-up{width:44px;height:44px;border-radius:50%;background:var(--s2);border:1px solid var(--ln2);font-size:20px;font-weight:700;color:var(--t2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+#btn-temp-down:active,#btn-temp-up:active{transform:scale(.88)}
+#target-temp-val{width:80px;text-align:center;font-family:var(--mono);font-size:28px;color:var(--cyan)}
+#fan-row{display:flex;border-radius:10px;overflow:hidden;border:1px solid var(--ln);background:var(--s2);margin-top:10px}
+.fan-seg{flex:1;padding:10px 4px;text-align:center;font-size:12px;font-weight:700;color:var(--t3);cursor:pointer;transition:all .2s;letter-spacing:.03em}
+.fan-seg.sel{background:var(--cyan-bg);color:var(--cyan)}
+#mode-scroll{overflow-x:auto;scrollbar-width:none;padding:10px 16px 0;display:flex;gap:8px}
+#mode-scroll::-webkit-scrollbar{display:none}
+.mode-card{flex-shrink:0;width:72px;height:64px;border-radius:12px;border:1px solid var(--ln);background:var(--s2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .2s}
+.mode-card .mi{font-size:22px;line-height:1}
+.mode-card .ml{font-size:11px;font-weight:700;color:var(--t3)}
+.mode-card.sel{background:var(--cyan-bg);border-color:rgba(0,212,255,.4)}
+.mode-card.sel .ml{color:var(--cyan)}
+#extras-card .ex-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--ln)}
+#extras-card .ex-row:last-child{border-bottom:none;padding-bottom:0}
+.ex-ico{font-size:20px;width:28px;text-align:center}
+.ex-info{flex:1}
+.ex-info h4{font-size:13px;font-weight:700;color:var(--t1)}
+.ex-info p{font-size:11px;color:var(--t3)}
+#stats-bar{display:flex;border-top:1px solid var(--ln);padding:10px 0;margin:0 16px}
+.stat-pill{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-size:11.5px;color:var(--t3);font-weight:600}
+.stat-pill+.stat-pill{border-left:1px solid var(--ln)}
+/* COLLECTION */
+#collection-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px 16px}
+.model-card{background:var(--s1);border:1px solid var(--ln);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:transform .15s;position:relative}
+.model-card:active{transform:scale(.97)}
+.model-img{height:80px;display:flex;align-items:center;justify-content:center;font-size:48px;background:var(--s2)}
+.model-info{padding:10px}
+.model-name{font-size:13px;font-weight:800;color:var(--t1);margin-bottom:3px;line-height:1.2}
+.model-brand{font-size:11px;color:var(--t3);margin-bottom:6px}
+.model-stats{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.model-stat{font-family:var(--mono);font-size:9px;color:var(--t3);background:var(--s3);border-radius:4px;padding:2px 5px}
+.model-action{width:100%;padding:8px;border-radius:8px;font-size:11px;font-weight:800;border:none;cursor:pointer;transition:all .15s}
+.action-equip{background:var(--cyan);color:#000}
+.action-unlock{background:var(--s2);color:var(--amber);border:1px solid rgba(240,180,41,.3)}
+.action-equipped{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
+.action-locked{background:var(--s2);color:var(--t4);border:1px solid var(--ln)}
+.model-lock{position:absolute;inset:0;background:rgba(13,17,23,.5);display:flex;align-items:center;justify-content:center;font-size:28px}
+/* ACHIEVEMENTS */
+.ach-item{display:flex;gap:12px;align-items:flex-start;padding:14px;background:var(--s1);border:1px solid var(--ln);border-radius:var(--r2);margin:0 16px 8px;transition:border-color .2s}
+.ach-item.earned{border-color:rgba(240,180,41,.3);background:var(--amber-bg)}
+.ach-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:var(--s2)}
+.ach-ico.earned-ico{background:rgba(240,180,41,.15)}
+.ach-info{flex:1;min-width:0}
+.ach-name{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:2px}
+.ach-desc{font-size:12px;color:var(--t3);line-height:1.4;margin-bottom:6px}
+.ach-right{flex-shrink:0;text-align:right}
+.ach-coins{font-size:11px;color:var(--amber);font-weight:700}
+/* CHALLENGES */
+.challenge-card{margin:0 16px 10px;background:var(--s1);border:1px solid var(--ln);border-radius:var(--r);padding:14px}
+.challenge-card.done{border-color:rgba(63,185,80,.3);background:var(--green-bg)}
+.ch-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ch-ico{font-size:22px}
+.ch-name{font-size:14px;font-weight:700;color:var(--t1);flex:1}
+.ch-reward{font-size:12px;font-weight:700;color:var(--amber)}
+.ch-desc{font-size:12px;color:var(--t3);margin-bottom:8px}
+.ch-prog-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ch-prog-text{font-size:11px;color:var(--t3);white-space:nowrap;min-width:60px;text-align:right}
+.streak-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.streak-dot.past{background:rgba(63,185,80,.2);color:var(--green);border:1px solid rgba(63,185,80,.3)}
+.streak-dot.today{background:var(--cyan-dim);color:var(--cyan);border:1px solid rgba(0,212,255,.3);animation:pulseDot 1.5s ease infinite}
+.streak-dot.future{background:var(--s2);color:var(--t4);border:1px solid var(--ln)}
+/* SETTINGS */
+.settings-section{margin:0 16px 16px}
+.settings-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);padding:14px 0 8px}
+.settings-item{background:var(--s1);border:1px solid var(--ln);border-radius:var(--r2);display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;cursor:pointer;transition:background .15s}
+.settings-item:active{background:var(--s2)}
+.settings-item .s-ico{font-size:20px;width:28px;text-align:center}
+.settings-item .s-info{flex:1}
+.settings-item .s-info h4{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:1px}
+.settings-item .s-info p{font-size:12px;color:var(--t3)}
+.settings-item select{background:transparent;border:none;color:var(--t3);font-size:13px;font-family:var(--sans);outline:none;cursor:pointer;-webkit-appearance:none}
+/* TOASTS */
+.coin-toast{position:fixed;z-index:500;font-size:14px;font-weight:800;color:var(--amber);pointer-events:none;animation:coinFloat .9s ease forwards;text-shadow:0 0 8px rgba(240,180,41,.5)}
+#ach-toast{position:fixed;top:80px;left:16px;right:16px;z-index:900;background:var(--amber-bg);border:1px solid rgba(240,180,41,.4);border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:12px;transform:translateY(-20px);opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+#ach-toast.show{transform:translateY(0);opacity:1}
+/* MINIGAME */
+#minigame-overlay{display:none;position:fixed;inset:0;z-index:800;background:var(--bg);flex-direction:column}
+#minigame-overlay.show{display:flex}
+#mg-header{padding:16px;padding-top:calc(16px + var(--safe-top));display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ln)}
+#mg-canvas-wrap{flex:1;position:relative;overflow:hidden}
+#mg-canvas{width:100%;height:100%;display:block}
+#mg-result{display:none;position:absolute;inset:0;background:rgba(13,17,23,.95);flex-direction:column;align-items:center;justify-content:center;gap:12px}
+#mg-result.show{display:flex}
+/* SIGNIN */
+#signin-banner{margin:8px 16px;background:var(--s1);border:1px solid var(--ln);border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:12px}
+#signin-btn{background:var(--cyan);color:#000;font-size:11px;font-weight:800;padding:8px 14px;border-radius:100px;cursor:pointer;white-space:nowrap;border:none}
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes splashPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes powerGlow{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.4)}50%{box-shadow:0 0 0 8px rgba(0,212,255,0)}}
+@keyframes airflow{0%{opacity:0;transform:translateY(-10px)}40%{opacity:1}100%{opacity:0;transform:translateY(80px)}}
+@keyframes pulseDot{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes coinFloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.hidden{display:none!important}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
+.bold{font-weight:700}.mono{font-family:var(--mono)}.cyan{color:var(--cyan)}.amber{color:var(--amber)}.green{color:var(--green)}.red{color:var(--red)}.t3{color:var(--t3)}.small{font-size:12px}.center{text-align:center}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-icon">❄️</div>
+  <div class="splash-title">AC Simulator</div>
+  <div class="splash-sub">Cool Your World</div>
+  <div class="splash-bar-track"><div class="splash-bar-fill" id="splash-bar"></div></div>
+  <div class="splash-ver">v1.0.0</div>
+</div>
+
+<!-- ACHIEVEMENT TOAST -->
+<div id="ach-toast">
+  <div id="ach-toast-ico" style="font-size:32px">🏆</div>
+  <div>
+    <div id="ach-toast-name" style="font-size:14px;font-weight:800;color:var(--amber)">Achievement!</div>
+    <div id="ach-toast-desc" style="font-size:12px;color:var(--t3)"></div>
+  </div>
+</div>
+
+<!-- MINI-GAME OVERLAY -->
+<div id="minigame-overlay">
+  <div id="mg-header">
+    <div><div class="small t3">SCORE</div><div id="mg-score-big" style="font-family:var(--mono);font-size:32px;color:var(--cyan)">0</div></div>
+    <div class="center"><div class="small t3">MULT</div><div id="mg-mult" style="font-family:var(--mono);font-size:22px;color:var(--amber)">×1</div></div>
+    <div><div class="small t3">BEST</div><div id="mg-high" style="font-family:var(--mono);font-size:18px;color:var(--t2)">0</div></div>
+  </div>
+  <div id="mg-canvas-wrap">
+    <canvas id="mg-canvas"></canvas>
+    <div id="mg-result">
+      <div style="font-size:48px">🎮</div>
+      <div style="font-size:24px;font-weight:800">Game Over</div>
+      <div class="small t3">Final Score</div>
+      <div id="mg-final-score" style="font-family:var(--mono);font-size:52px;color:var(--cyan)">0</div>
+      <div id="mg-final-coins" style="font-size:18px;color:var(--amber)">+0 🪙</div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-primary" onclick="startMiniGame()">▶ Replay</button>
+        <button class="btn btn-secondary" onclick="closeMiniGame()">← Menu</button>
+      </div>
+    </div>
+  </div>
+  <div style="padding:12px 16px;padding-bottom:calc(12px + var(--safe-bot));display:flex;gap:8px;border-top:1px solid var(--ln)">
+    <button class="btn btn-secondary" style="flex:1" onclick="closeMiniGame()">✕ Exit</button>
+    <div style="flex:2;text-align:center;padding:8px;font-size:12px;color:var(--t3)">Keep temp in the<br>green zone!</div>
+    <button class="btn btn-primary" style="flex:1" onclick="mgAdj(1)">▲ Cool</button>
+    <button class="btn btn-secondary" style="flex:1" onclick="mgAdj(-1)">▼ Heat</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+
+  <!-- Install Banner -->
+  <div id="install-banner">
+    <span style="flex:1;font-size:13px;color:var(--t2)"><strong style="color:var(--cyan)">Install AC Simulator</strong> for best experience</span>
+    <button class="btn btn-primary" style="padding:8px 16px;font-size:12px" onclick="installPWA()">Install</button>
+    <button style="color:var(--t3);font-size:20px;padding:4px 8px;background:none;border:none;cursor:pointer" onclick="dismissInstall()">✕</button>
+  </div>
+
+  <!-- ═══ GAME SCREEN ═══ -->
+  <div class="screen active" id="game-screen">
+    <div id="room-panel">
+      <div class="airflow-line" id="af1"></div>
+      <div class="airflow-line" id="af2"></div>
+      <div class="airflow-line" id="af3"></div>
+      <div class="airflow-line" id="af4"></div>
+      <div id="room-top-bar">
+        <div id="room-model-name">BasicCool 1000</div>
+        <div id="elec-badge">OFF</div>
+      </div>
+      <div id="room-temp-display">
+        <div><span id="room-temp-big">38</span><span id="room-temp-unit">°C</span></div>
+        <div id="feels-like">🔥 Very Hot</div>
+      </div>
+    </div>
+
+    <div id="game-controls">
+      <!-- Coin bar + quick actions -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 4px">
+        <div class="row" style="gap:6px">
+          <span style="font-size:18px">🪙</span>
+          <span id="coin-display" class="mono" style="font-size:16px;font-weight:800;color:var(--amber)">0</span>
+          <span class="small t3">coins</span>
+        </div>
+        <div class="row" style="gap:6px">
+          <button class="pill pill-cyan" onclick="showMiniGame()">🎮 Mini-Game</button>
+          <button class="pill pill-gray" id="timer-btn" onclick="openTimer()">⏱ Timer</button>
+        </div>
+      </div>
+
+      <!-- Power + Temp -->
+      <div id="power-temp-card">
+        <button id="power-btn" onclick="togglePower()">⏻</button>
+        <div id="vdiv"></div>
+        <div id="temp-control">
+          <div id="temp-label">Target Temp</div>
+          <div id="temp-row">
+            <button id="btn-temp-down" onclick="changeTargetTemp(-1)">−</button>
+            <div id="target-temp-val">24°C</div>
+            <button id="btn-temp-up" onclick="changeTargetTemp(1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fan Speed -->
+      <div class="card" style="margin:0 16px 10px">
+        <div class="small t3" style="font-weight:700;letter-spacing:.08em;text-transform:uppercase">Fan Speed</div>
+        <div id="fan-row">
+          <div class="fan-seg sel" data-speed="AUTO" onclick="setFan(this)">AUTO</div>
+          <div class="fan-seg" data-speed="LOW" onclick="setFan(this)">LOW</div>
+          <div class="fan-seg" data-speed="MED" onclick="setFan(this)">MED</div>
+          <div class="fan-seg" data-speed="HIGH" onclick="setFan(this)">HIGH</div>
+        </div>
+      </div>
+
+      <!-- Modes -->
+      <div class="card" style="margin:0 16px 10px;padding:14px 14px 4px">
+        <div class="small t3" style="font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Mode</div>
+        <div id="mode-scroll">
+          <div class="mode-card sel" data-mode="COOL" onclick="setMode(this)"><div class="mi">❄️</div><div class="ml">COOL</div></div>
+          <div class="mode-card" data-mode="HEAT" onclick="setMode(this)"><div class="mi">🌡️</div><div class="ml">HEAT</div></div>
+          <div class="mode-card" data-mode="FAN" onclick="setMode(this)"><div class="mi">💨</div><div class="ml">FAN</div></div>
+          <div class="mode-card" data-mode="DRY" onclick="setMode(this)"><div class="mi">💧</div><div class="ml">DRY</div></div>
+          <div class="mode-card" data-mode="AUTO" onclick="setMode(this)"><div class="mi">🔄</div><div class="ml">AUTO</div></div>
+        </div>
+      </div>
+
+      <!-- Extra Toggles -->
+      <div class="card" id="extras-card" style="margin:0 16px 10px;padding:14px">
+        <div class="ex-row"><div class="ex-ico">🔄</div><div class="ex-info"><h4>Swing</h4><p>Oscillate air direction</p></div><button class="tog" id="swing-tog" onclick="toggleSwing()"></button></div>
+        <div class="ex-row"><div class="ex-ico">😴</div><div class="ex-info"><h4>Sleep Mode</h4><p>Limits fan to LOW</p></div><button class="tog" id="sleep-tog" onclick="toggleSleep()"></button></div>
+        <div class="ex-row"><div class="ex-ico">📶</div><div class="ex-info"><h4>WiFi Link</h4><p>Smart home connected</p></div><button class="tog" id="wifi-tog" onclick="toggleWifi()"></button></div>
+      </div>
+
+      <!-- Stats bar -->
+      <div id="stats-bar">
+        <div class="stat-pill">⚡ <span id="stat-watts">0W</span></div>
+        <div class="stat-pill">⏱ <span id="stat-time">00:00</span></div>
+        <div class="stat-pill">📊 <span id="stat-kwh">0.000</span> kWh</div>
+        <div class="stat-pill"><span id="stat-rating">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ COLLECTION SCREEN ═══ -->
+  <div class="screen" id="collection-screen">
+    <div class="page-header">
+      <div><div class="page-title">AC Collection</div><div class="page-sub" id="collection-sub">0 / 12 unlocked</div></div>
+      <div class="pill pill-amber">🪙 <span id="coin-col">0</span></div>
+    </div>
+    <div id="collection-grid"></div>
+  </div>
+
+  <!-- ═══ CHALLENGES SCREEN ═══ -->
+  <div class="screen" id="challenges-screen">
+    <div class="page-header">
+      <div><div class="page-title">Daily Quests</div><div class="page-sub">Resets at midnight · <span id="ch-countdown">--:--:--</span></div></div>
+    </div>
+    <div class="card">
+      <div class="row-between" style="margin-bottom:10px">
+        <span class="small t3" style="font-weight:700;text-transform:uppercase;letter-spacing:.08em">Weekly Streak</span>
+        <span class="pill pill-amber">🔥 <span id="streak-count">0</span> days</span>
+      </div>
+      <div id="streak-row" style="display:flex;gap:8px;align-items:center"></div>
+    </div>
+    <div id="challenges-list"></div>
+    <div class="card" style="margin-top:4px;cursor:pointer" onclick="showTab('ach-screen')">
+      <div class="row-between">
+        <div><div style="font-weight:800;font-size:15px">🏆 Achievements</div><div class="small t3 mt8"><span id="ach-count-display">0</span> / 30 earned</div></div>
+        <span style="font-size:22px;color:var(--t3)">›</span>
+      </div>
+      <div class="prog-track mt12"><div class="prog-fill" id="ach-prog-bar" style="width:0%;background:var(--amber)"></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ ACHIEVEMENTS SCREEN ═══ -->
+  <div class="screen" id="ach-screen">
+    <div class="page-header">
+      <div><div class="page-title">Achievements</div><div class="page-sub" id="ach-page-sub">0 / 30 earned</div></div>
+    </div>
+    <div id="ach-list"></div>
+  </div>
+
+  <!-- ═══ SETTINGS SCREEN ═══ -->
+  <div class="screen" id="settings-screen">
+    <div class="page-header"><div class="page-title">Settings</div></div>
+    <div id="signin-banner">
+      <div style="font-size:28px">☁️</div>
+      <div style="flex:1"><h4 style="font-size:13px;font-weight:700">Save Progress to Cloud</h4><p class="small t3">Optional Google Sign-in syncs your data</p></div>
+      <button id="signin-btn" onclick="signInWithGoogle()">Sign In</button>
+    </div>
+    <div id="signout-area" class="card hidden">
+      <div class="row-between">
+        <div><div style="font-weight:700;font-size:14px" id="user-name-display">Signed in</div><div class="small t3" id="user-email-display"></div></div>
+        <button class="btn btn-secondary" style="padding:8px 16px;font-size:12px" onclick="signOutUser()">Sign Out</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">Simulation</div>
+      <div class="settings-item">
+        <div class="s-ico">🌡️</div>
+        <div class="s-info"><h4>Outdoor Temperature</h4><p id="outdoor-temp-label">38°C</p></div>
+        <select id="outdoor-temp-select" onchange="setOutdoorTemp(this.value)">
+          <option value="25">25°C</option><option value="30">30°C</option><option value="35">35°C</option>
+          <option value="38" selected>38°C</option><option value="42">42°C</option><option value="45">45°C</option>
+        </select>
+      </div>
+      <div class="settings-item">
+        <div class="s-ico">🏠</div>
+        <div class="s-info"><h4>Room Size</h4><p id="room-size-label">Medium</p></div>
+        <select id="room-size-select" onchange="setRoomSize(this.value)">
+          <option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option>
+        </select>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">Sound</div>
+      <div class="settings-item">
+        <div class="s-ico">🔊</div>
+        <div class="s-info"><h4>Sound Effects</h4><p>AC sounds & button clicks</p></div>
+        <button class="tog on" id="sfx-tog" onclick="toggleSfx()"></button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">Data</div>
+      <div class="settings-item" onclick="exportStats()"><div class="s-ico">📤</div><div class="s-info"><h4>Share Stats</h4><p>Share your achievements</p></div><div style="color:var(--t3)">›</div></div>
+      <div class="settings-item" onclick="installPWA()"><div class="s-ico">📲</div><div class="s-info"><h4>Install App</h4><p>Add to home screen</p></div><div style="color:var(--t3)">›</div></div>
+      <div class="settings-item" onclick="confirmReset()"><div class="s-ico">🗑️</div><div class="s-info"><h4 style="color:var(--red)">Reset Progress</h4><p>Clears all data</p></div><div style="color:var(--red)">›</div></div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">Secret</div>
+      <div class="settings-item" onclick="tapLogo()">
+        <div class="s-ico" id="easter-ico">❄️</div>
+        <div class="s-info"><h4>Secret</h4><p>Tap the icon 7 times...</p></div>
+        <div style="color:var(--t4)" id="easter-count">0/7</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav id="bottom-nav">
+    <button class="nav-btn on" onclick="showTab('game-screen')"><div class="ni">❄️</div>Game</button>
+    <button class="nav-btn" onclick="showTab('collection-screen')"><div class="ni">🏭</div>ACs</button>
+    <button class="nav-btn" onclick="showTab('challenges-screen')"><div class="ni">📅</div>Quests</button>
+    <button class="nav-btn" onclick="showTab('ach-screen')"><div class="ni">🏆</div>Awards</button>
+    <button class="nav-btn" onclick="showTab('settings-screen')"><div class="ni">⚙️</div>Settings</button>
+  </nav>
+</div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getFirestore,doc,setDoc,getDoc}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getAnalytics}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js';
+const cfg={apiKey:"AIzaSyBDNrZV5XfAPYxBGBCgEzpnVI6Zuiany90",authDomain:"studio-2557753269-f606c.firebaseapp.com",projectId:"studio-2557753269-f606c",storageBucket:"studio-2557753269-f606c.firebasestorage.app",messagingSenderId:"316960991399",appId:"1:316960991399:web:d0567a6eeebcec05ccd382",measurementId:"G-TSMWRW6EWH"};
+const app=initializeApp(cfg);
+const auth=getAuth(app);const db=getFirestore(app);const ga=getAnalytics(app);const prov=new GoogleAuthProvider();
+window._auth=auth;window._db=db;window._prov=prov;window._signInWithPopup=signInWithPopup;window._signOut=signOut;window._doc=doc;window._setDoc=setDoc;window._getDoc=getDoc;
+onAuthStateChanged(auth,async u=>{
+  if(u){
+    document.getElementById('signin-banner').classList.add('hidden');
+    document.getElementById('signout-area').classList.remove('hidden');
+    document.getElementById('user-name-display').textContent=u.displayName||'Signed in';
+    document.getElementById('user-email-display').textContent=u.email||'';
+    window._user=u;
+    try{const s=await getDoc(doc(db,'users',u.uid));if(s.exists()){const d=s.data();if((d.coins||0)>G.coins){G.coins=d.coins||0;G.unlockedModels=d.unlockedModels||[0];G.achievements=d.achievements||{};G.totalSessions=d.totalSessions||0;G.totalKwh=d.totalKwh||0;G.totalCoinsEarned=d.totalCoinsEarned||0;saveState();refreshUI();}}}catch(e){}
+  }else{document.getElementById('signin-banner').classList.remove('hidden');document.getElementById('signout-area').classList.add('hidden');window._user=null;}
+});
+window.saveCloud=async()=>{if(!window._user)return;try{await setDoc(doc(db,'users',window._user.uid),{coins:G.coins,unlockedModels:G.unlockedModels,achievements:G.achievements,totalSessions:G.totalSessions,totalKwh:G.totalKwh,totalCoinsEarned:G.totalCoinsEarned,ts:new Date().toISOString()},{merge:true});}catch(e){}};
+window.signInWithGoogle=async()=>{try{await signInWithPopup(auth,prov);}catch(e){alert('Sign in failed: '+e.message);}};
+window.signOutUser=async()=>{if(confirm('Sign out?'))await signOut(auth);};
+</script>
+
+<!-- MAIN GAME SCRIPT -->
+<script>
+'use strict';
+const ACS=[
+  {id:0,name:'BasicCool 1000',brand:'Generic',rarity:'COMMON',icon:'🌀',maxW:900,eff:0.8,cost:0,desc:'Your first AC.'},
+  {id:1,name:'Haier EcoStar',brand:'Haier',rarity:'COMMON',icon:'💨',maxW:1100,eff:0.9,cost:500,desc:'Budget-friendly.'},
+  {id:2,name:'PEL InverStar',brand:'PEL',rarity:'COMMON',icon:'❄️',maxW:950,eff:1.0,cost:800,desc:'Pakistani made.'},
+  {id:3,name:'Dawlance Elegance',brand:'Dawlance',rarity:'RARE',icon:'🔵',maxW:1300,eff:1.1,cost:1500,desc:'Enhanced cooling.'},
+  {id:4,name:'Samsung WindFree',brand:'Samsung',rarity:'RARE',icon:'🌊',maxW:1200,eff:1.2,cost:2000,desc:'WindFree tech.'},
+  {id:5,name:'Gree Fairy',brand:'Gree',rarity:'RARE',icon:'🌸',maxW:1100,eff:1.15,cost:2500,desc:'Ultra-quiet.'},
+  {id:6,name:'LG DualCool',brand:'LG',rarity:'EPIC',icon:'⚡',maxW:1400,eff:1.3,cost:4000,desc:'Dual inverter.'},
+  {id:7,name:'Daikin Inverter Pro',brand:'Daikin',rarity:'EPIC',icon:'🔷',maxW:1350,eff:1.35,cost:5000,desc:'Japanese engineering.'},
+  {id:8,name:'Panasonic AeroCare',brand:'Panasonic',rarity:'EPIC',icon:'💎',maxW:1300,eff:1.4,cost:6000,desc:'Self-cleaning.'},
+  {id:9,name:'Mitsubishi FH',brand:'Mitsubishi',rarity:'LEGENDARY',icon:'👑',maxW:1500,eff:1.5,cost:10000,desc:'Pinnacle of cooling.'},
+  {id:10,name:'Carrier AquaSnap',brand:'Carrier',rarity:'LEGENDARY',icon:'🌟',maxW:1450,eff:1.45,cost:12000,desc:'Commercial grade.'},
+  {id:11,name:'CrystalFrost X',brand:'SECRET',rarity:'SECRET',icon:'🧊',maxW:500,eff:2.0,cost:0,desc:'Theoretical perfection.'},
+];
+const RC={'COMMON':'#8B949E','RARE':'#58A6FF','EPIC':'#BC8CFF','LEGENDARY':'#F0B429','SECRET':'#00D4FF'};
+const ACHS=[
+  {id:'power1',name:'First Chill',desc:'Turn on AC',coins:25,cat:'⚡',chk:g=>g.totalPowerOns>=1},
+  {id:'cool16',name:'Icebox',desc:'Reach 16°C',coins:100,cat:'❄️',chk:g=>g.minTemp<=16},
+  {id:'cool20',name:'Comfort Zone',desc:'Reach 20°C',coins:50,cat:'❄️',chk:g=>g.minTemp<=20},
+  {id:'hot40',name:'Blast Furnace',desc:'Let room reach 40°C',coins:30,cat:'🔥',chk:g=>g.maxTemp>=40},
+  {id:'s5',name:'Regular User',desc:'5 sessions',coins:75,cat:'🎮',chk:g=>g.totalSessions>=5},
+  {id:'s20',name:'Dedicated',desc:'20 sessions',coins:150,cat:'🎮',chk:g=>g.totalSessions>=20},
+  {id:'kwh1',name:'Energy Tracker',desc:'1 kWh total',coins:50,cat:'⚡',chk:g=>g.totalKwh>=1},
+  {id:'kwh10',name:'Power Hungry',desc:'10 kWh total',coins:100,cat:'⚡',chk:g=>g.totalKwh>=10},
+  {id:'c100',name:'Saver',desc:'Earn 100 coins',coins:0,cat:'🪙',chk:g=>g.totalCoinsEarned>=100},
+  {id:'c1000',name:'Coin Master',desc:'Earn 1,000 coins',coins:50,cat:'🪙',chk:g=>g.totalCoinsEarned>=1000},
+  {id:'unlock1',name:'Collector',desc:'Unlock first AC',coins:100,cat:'🏭',chk:g=>g.unlockedModels.length>=2},
+  {id:'unlock5',name:'Enthusiast',desc:'Own 5 ACs',coins:200,cat:'🏭',chk:g=>g.unlockedModels.length>=5},
+  {id:'unlockAll',name:'Completionist',desc:'Unlock 11 ACs',coins:500,cat:'🏭',chk:g=>g.unlockedModels.length>=11},
+  {id:'rare',name:'Rare Taste',desc:'Own a RARE model',coins:150,cat:'🌊',chk:g=>g.unlockedModels.some(i=>ACS[i]?.rarity==='RARE')},
+  {id:'epic',name:'Epic Owner',desc:'Own an EPIC model',coins:300,cat:'💎',chk:g=>g.unlockedModels.some(i=>ACS[i]?.rarity==='EPIC')},
+  {id:'legend',name:'Legend',desc:'Own a LEGENDARY',coins:500,cat:'👑',chk:g=>g.unlockedModels.some(i=>ACS[i]?.rarity==='LEGENDARY')},
+  {id:'modes5',name:'Mode Explorer',desc:'Use all 5 modes',coins:75,cat:'🔄',chk:g=>g.modesSet&&g.modesSet.size>=5},
+  {id:'sleep5',name:'Sleep Master',desc:'Sleep Mode 5 times',coins:50,cat:'😴',chk:g=>g.sleepUses>=5},
+  {id:'swing10',name:'Swing Dancer',desc:'Swing 10 times',coins:40,cat:'🔄',chk:g=>g.swingUses>=10},
+  {id:'mg100',name:'Mini-Game Starter',desc:'Score 100 in Cool Zone',coins:75,cat:'🎮',chk:g=>g.mgHigh>=100},
+  {id:'mg500',name:'Zone Master',desc:'Score 500',coins:150,cat:'🎮',chk:g=>g.mgHigh>=500},
+  {id:'ch1',name:'First Quest',desc:'Complete 1 challenge',coins:50,cat:'📅',chk:g=>g.chCompleted>=1},
+  {id:'ch7',name:'Quest Warrior',desc:'Complete 7 challenges',coins:100,cat:'📅',chk:g=>g.chCompleted>=7},
+  {id:'str3',name:'On Fire',desc:'3 day streak',coins:75,cat:'🔥',chk:g=>g.maxStreak>=3},
+  {id:'str7',name:'Unstoppable',desc:'7 day streak',coins:200,cat:'🔥',chk:g=>g.maxStreak>=7},
+  {id:'tempHit',name:'Goldilocks',desc:'Hit target temp 10×',coins:80,cat:'🌡️',chk:g=>g.tempHits>=10},
+  {id:'highFan',name:'Hurricane',desc:'HIGH fan 5 minutes',coins:60,cat:'💨',chk:g=>g.highFanSecs>=300},
+  {id:'eco',name:'Eco Warrior',desc:'LOW fan 10 minutes',coins:80,cat:'🌿',chk:g=>g.lowFanSecs>=600},
+  {id:'egg',name:'Secret Finder',desc:'Find CrystalFrost X',coins:500,cat:'🧊',chk:g=>g.foundEgg},
+  {id:'share',name:'Sharer',desc:'Share the app',coins:25,cat:'📤',chk:g=>g.hasShared},
+];
+const CH_TYPES=[
+  {id:'cool',name:'Cool It Down',ico:'❄️',desc:'Cool the room to {t}°C',targets:[16,18,20,22],type:'coolTo',cr:[100,200]},
+  {id:'eco',name:'Eco Mode',ico:'🌿',desc:'LOW fan for {t} minutes',targets:[2,3,5,8],type:'lowFan',cr:[80,150]},
+  {id:'run',name:'Marathon',ico:'⏱️',desc:'Run AC for {t} minutes',targets:[3,5,8,10],type:'runtime',cr:[100,180]},
+  {id:'mg',name:'Game On',ico:'🎮',desc:'Score {t} in Cool Zone',targets:[50,100,200],type:'mgScore',cr:[80,150]},
+  {id:'modes',name:'Mode Master',ico:'🔄',desc:'Use all 5 modes',targets:[5],type:'allModes',cr:[120,200]},
+];
+
+let G={
+  coins:0,totalCoinsEarned:0,equippedModel:0,unlockedModels:[0],
+  isPowered:false,targetTemp:24,roomTemp:38,fanSpeed:'AUTO',mode:'COOL',
+  swingOn:false,sleepOn:false,wifiOn:false,
+  sessionKwh:0,totalSessions:0,totalKwh:0,
+  achievements:{},totalPowerOns:0,minTemp:38,maxTemp:38,
+  sleepUses:0,swingUses:0,modesSet:new Set(),
+  mgHigh:0,chCompleted:0,tempHits:0,
+  highFanSecs:0,lowFanSecs:0,maxStreak:0,
+  currentStreak:0,foundEgg:false,hasShared:false,
+  outdoorTemp:38,roomSize:'medium',sfxOn:true,
+  todayChallenges:[],lastChDate:'',chProgress:{},chClaimed:{},
+  easterTaps:0,easterLast:0,
+};
+
+function saveState(){try{const s={...G,modesSet:[...G.modesSet]};localStorage.setItem('ac1',JSON.stringify(s));}catch(e){}}
+function loadState(){try{const s=localStorage.getItem('ac1');if(!s)return;const d=JSON.parse(s);G={...G,...d};G.modesSet=new Set(d.modesSet||[]);G.isPowered=false;}catch(e){}}
+
+let physInt=null,sesInt=null,sesSecs=0;
+
+function startPhysics(){
+  if(physInt)return;
+  physInt=setInterval(tick,500);
+  sesSecs=0;
+  sesInt=setInterval(()=>{
+    sesSecs++;
+    updateTimer();
+    if(G.isPowered){
+      if(G.fanSpeed==='HIGH')G.highFanSecs++;
+      if(G.fanSpeed==='LOW')G.lowFanSecs++;
+    }
+  },1000);
+}
+
+function tick(){
+  const m=ACS[G.equippedModel];
+  const dt=0.5;
+  const rateMap={'AUTO':0,'LOW':0.1,'MED':0.2,'HIGH':0.3};
+  if(!G.isPowered){
+    G.roomTemp+=((G.outdoorTemp-G.roomTemp)*0.08*dt);
+    G.sessionWatts=0;
+  }else{
+    const fan=G.fanSpeed;
+    if(G.mode==='COOL'){
+      let rate=fan==='AUTO'?(G.roomTemp-G.targetTemp>5?0.3:G.roomTemp-G.targetTemp>2?0.2:0.1):(rateMap[fan]||0.2);
+      rate*=m.eff;
+      const d=G.roomTemp-G.targetTemp;
+      G.roomTemp-=Math.min(rate*dt,Math.max(0,d));
+    }else if(G.mode==='HEAT'){
+      const d=G.targetTemp-G.roomTemp;
+      G.roomTemp+=Math.min(0.15*dt,Math.max(0,d));
+    }
+    const wm={'AUTO':0.85,'LOW':0.7,'MED':0.85,'HIGH':1.0}[fan]||0.85;
+    G.sessionWatts=Math.round(m.maxW*wm);
+    const kInc=G.sessionWatts/3600000*dt;
+    G.sessionKwh+=kInc;G.totalKwh+=kInc;
+  }
+  G.roomTemp=Math.max(10,Math.min(50,G.roomTemp));
+  if(G.roomTemp<G.minTemp)G.minTemp=G.roomTemp;
+  if(G.roomTemp>G.maxTemp)G.maxTemp=G.roomTemp;
+  if(G.isPowered&&Math.abs(G.roomTemp-G.targetTemp)<0.5){G.tempHits++;if(G.tempHits%5===0)earnCoins(5,null);}
+  updateUI();checkAchs();updateChProgress();
+}
+
+function togglePower(){
+  G.isPowered=!G.isPowered;
+  const btn=document.getElementById('power-btn');
+  btn.classList.toggle('on',G.isPowered);
+  document.querySelectorAll('.airflow-line').forEach(l=>l.classList.toggle('show',G.isPowered));
+  if(G.isPowered){
+    G.totalPowerOns++;G.modesSet=new Set();G.sessionKwh=0;G.sessionWatts=0;
+    startPhysics();playSound('on');earnCoins(10,null);
+    const today=new Date().toDateString();
+    if(localStorage.getItem('lastDay')!==today){localStorage.setItem('lastDay',today);earnCoins(50,'🌅 First session today! +50 🪙');}
+  }else{
+    G.totalSessions++;
+    const eff=getRating();
+    const b={'A+++':50,'A++':40,'A+':30,'A':20,'B':10}[eff]||0;
+    if(b)earnCoins(b,null);
+    playSound('off');
+  }
+  saveState();if(window.saveCloud)window.saveCloud();
+}
+
+function changeTargetTemp(d){G.targetTemp=Math.max(16,Math.min(30,G.targetTemp+d));document.getElementById('target-temp-val').textContent=G.targetTemp+'°C';playSound('beep');saveState();}
+function setFan(el){document.querySelectorAll('.fan-seg').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');G.fanSpeed=el.dataset.speed;if(G.sleepOn&&G.fanSpeed!=='LOW'){G.fanSpeed='LOW';document.querySelectorAll('.fan-seg').forEach(s=>s.classList.remove('sel'));document.querySelector('[data-speed="LOW"]').classList.add('sel');}saveState();}
+function setMode(el){document.querySelectorAll('.mode-card').forEach(m=>m.classList.remove('sel'));el.classList.add('sel');G.mode=el.dataset.mode;G.modesSet.add(G.mode);playSound('beep');saveState();}
+function toggleSwing(){G.swingOn=!G.swingOn;document.getElementById('swing-tog').classList.toggle('on',G.swingOn);if(G.swingOn)G.swingUses++;saveState();}
+function toggleSleep(){G.sleepOn=!G.sleepOn;document.getElementById('sleep-tog').classList.toggle('on',G.sleepOn);if(G.sleepOn){G.sleepUses++;setFan(document.querySelector('[data-speed="LOW"]'));}saveState();}
+function toggleWifi(){G.wifiOn=!G.wifiOn;document.getElementById('wifi-tog').classList.toggle('on',G.wifiOn);saveState();}
+
+function earnCoins(n,msg){
+  G.coins+=n;G.totalCoinsEarned+=n;updateCoins();
+  const t=document.createElement('div');t.className='coin-toast';t.textContent='+'+n+' 🪙';
+  t.style.left=(window.innerWidth*.5-20)+'px';t.style.top=(window.innerHeight*.35)+'px';
+  document.body.appendChild(t);setTimeout(()=>t.remove(),950);
+  if(msg)toast(msg);
+}
+function spendCoins(n){if(G.coins<n)return false;G.coins-=n;updateCoins();return true;}
+function updateCoins(){document.querySelectorAll('#coin-display,#coin-col').forEach(e=>e.textContent=G.coins.toLocaleString());}
+
+function toast(msg){const t=document.createElement('div');t.style.cssText='position:fixed;top:80px;left:16px;right:16px;z-index:900;background:#0D2030;border:1px solid rgba(0,212,255,.3);border-radius:12px;padding:12px 16px;font-size:14px;font-weight:700;color:#00D4FF;text-align:center;animation:fadeUp .3s ease';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s'},2000);setTimeout(()=>t.remove(),2400);}
+
+function checkAchs(){ACHS.forEach(a=>{if(!G.achievements[a.id]&&a.chk(G)){G.achievements[a.id]={at:new Date().toISOString()};if(a.coins>0)earnCoins(a.coins,null);showAchToast(a);renderAchs();saveState();if(window.saveCloud)window.saveCloud();}});}
+function showAchToast(a){const t=document.getElementById('ach-toast');document.getElementById('ach-toast-ico').textContent=a.cat;document.getElementById('ach-toast-name').textContent=a.name;document.getElementById('ach-toast-desc').textContent=a.desc+(a.coins?' · +'+a.coins+' 🪙':'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+
+function renderAchs(){
+  const list=document.getElementById('ach-list');if(!list)return;
+  const earned=Object.keys(G.achievements).length;
+  document.getElementById('ach-page-sub').textContent=earned+' / 30 earned';
+  document.getElementById('ach-count-display').textContent=earned;
+  document.getElementById('ach-prog-bar').style.width=(earned/30*100)+'%';
+  list.innerHTML=ACHS.map(a=>{const e=!!G.achievements[a.id];const dt=e?new Date(G.achievements[a.id].at).toLocaleDateString():'';return`<div class="ach-item ${e?'earned':''}"><div class="ach-ico ${e?'earned-ico':''}">${a.cat}</div><div class="ach-info"><div class="ach-name">${e?'':'🔒 '}${a.name}</div><div class="ach-desc">${e?a.desc:'???'}</div></div><div class="ach-right">${a.coins?`<div class="ach-coins">+${a.coins} 🪙</div>`:''}<div style="font-size:10px;color:var(--t4)">${dt}</div>${e?'<div style="color:var(--green);font-size:18px;margin-top:4px">✓</div>':''}</div></div>`;}).join('');
+}
+
+function genChallenges(){
+  const today=new Date().toDateString();
+  if(G.lastChDate===today&&G.todayChallenges.length===3)return;
+  G.lastChDate=today;G.chProgress={};G.chClaimed={};
+  const seed=today.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const arr=[...CH_TYPES].sort((a,b)=>(seed*a.id.length%7)-(seed*b.id.length%7));
+  G.todayChallenges=arr.slice(0,3).map((t,i)=>{
+    const tv=t.targets[(seed+i)%t.targets.length];
+    const coins=t.cr[0]+Math.floor(seed%(t.cr[1]-t.cr[0]));
+    return{id:t.id+'_'+i,name:t.name,ico:t.ico,desc:t.desc.replace('{t}',tv),type:t.type,target:tv,coins};
+  });
+  saveState();
+}
+
+function updateChProgress(){
+  if(!G.todayChallenges)return;
+  G.todayChallenges.forEach(ch=>{
+    if(G.chClaimed[ch.id])return;
+    let p=G.chProgress[ch.id]||0;
+    switch(ch.type){
+      case 'coolTo':p=G.roomTemp<=ch.target?1:0;break;
+      case 'lowFan':p=Math.min(ch.target,Math.floor(G.lowFanSecs/60));break;
+      case 'runtime':p=Math.min(ch.target,Math.floor(sesSecs/60));break;
+      case 'mgScore':p=Math.min(ch.target,G.mgHigh);break;
+      case 'allModes':p=Math.min(ch.target,G.modesSet.size);break;
+    }
+    G.chProgress[ch.id]=p;
+  });
+  renderChallenges();
+}
+
+function renderChallenges(){
+  const list=document.getElementById('challenges-list');if(!list)return;
+  list.innerHTML=G.todayChallenges.map(ch=>{
+    const p=G.chProgress[ch.id]||0,claimed=G.chClaimed[ch.id];
+    const done=p>=ch.target,pct=Math.min(100,Math.round(p/ch.target*100));
+    return`<div class="challenge-card ${claimed?'done':''}">
+      <div class="ch-head"><div class="ch-ico">${ch.ico}</div><div class="ch-name">${ch.name}</div><div class="ch-reward">+${ch.coins} 🪙</div></div>
+      <div class="ch-desc">${ch.desc}</div>
+      <div class="ch-prog-row"><div class="prog-track" style="flex:1"><div class="prog-fill ${done?'green':''}" style="width:${pct}%"></div></div><div class="ch-prog-text">${p}/${ch.target}</div></div>
+      ${done&&!claimed?`<button onclick="claimCh('${ch.id}',${ch.coins})" style="width:100%;padding:10px;border-radius:8px;font-size:12px;font-weight:800;border:none;cursor:pointer;background:var(--green);color:#000">🎉 Claim ${ch.coins} coins!</button>`:''}
+      ${claimed?`<div style="width:100%;padding:10px;border-radius:8px;font-size:12px;font-weight:700;background:rgba(63,185,80,.1);color:var(--green);border:1px solid rgba(63,185,80,.2);text-align:center">✅ Claimed!</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function claimCh(id,coins){G.chClaimed[id]=true;G.chCompleted++;earnCoins(coins,'📅 Challenge complete!');checkStreakU();checkAchs();renderChallenges();saveState();if(window.saveCloud)window.saveCloud();}
+function checkStreakU(){const today=new Date().toDateString();const yesterday=new Date(Date.now()-86400000).toDateString();if(localStorage.getItem('lastCh')===yesterday)G.currentStreak++;else if(localStorage.getItem('lastCh')!==today)G.currentStreak=1;localStorage.setItem('lastCh',today);G.maxStreak=Math.max(G.maxStreak,G.currentStreak);}
+
+function renderStreak(){
+  const row=document.getElementById('streak-row');if(!row)return;
+  document.getElementById('streak-count').textContent=G.currentStreak||0;
+  row.innerHTML='';const today=new Date();const days=['S','M','T','W','T','F','S'];
+  for(let i=6;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);const k=d.toDateString();const has=localStorage.getItem('lastCh')===k;const cl=i===0?'today':has?'past':'future';const div=document.createElement('div');div.className='streak-dot '+cl;div.textContent=days[d.getDay()];row.appendChild(div);}
+}
+
+function renderCollection(){
+  const grid=document.getElementById('collection-grid');if(!grid)return;
+  document.getElementById('collection-sub').textContent=G.unlockedModels.length+' / 12 unlocked';
+  grid.innerHTML=ACS.map(m=>{
+    const unlocked=G.unlockedModels.includes(m.id),equipped=G.equippedModel===m.id;
+    const rc=RC[m.rarity];
+    return`<div class="model-card ${!unlocked?'locked':''} ${equipped?'equipped':''}" style="border-color:${equipped?'rgba(0,212,255,.4)':rc+'22'}">
+      <div class="model-img" style="background:${rc}15">${m.icon}</div>
+      <div class="model-info">
+        <div class="model-name">${m.name}</div>
+        <div class="model-brand">${m.brand}</div>
+        <div class="model-stats">
+          <div class="model-stat">${m.maxW}W</div>
+          <div class="model-stat">×${m.eff}</div>
+          <span style="font-size:9px;padding:2px 5px;border-radius:4px;background:${rc}20;color:${rc}">${m.rarity}</span>
+        </div>
+        ${m.rarity==='SECRET'&&!unlocked?`<button class="model-action action-locked">🔒 Secret</button>`:!unlocked?`<button class="model-action action-unlock" onclick="tryUnlock(${m.id})">🪙 ${m.cost.toLocaleString()}</button>`:equipped?`<button class="model-action action-equipped">✓ Equipped</button>`:`<button class="model-action action-equip" onclick="equipModel(${m.id})">Equip</button>`}
+      </div>
+      ${!unlocked&&m.rarity!=='SECRET'?'<div class="model-lock">🔒</div>':''}
+    </div>`;
+  }).join('');
+}
+
+function tryUnlock(id){
+  const m=ACS[id];
+  if(G.coins<m.cost){toast('❌ Need '+m.cost.toLocaleString()+' 🪙');return;}
+  if(!confirm('Unlock '+m.name+' for '+m.cost.toLocaleString()+' coins?'))return;
+  spendCoins(m.cost);G.unlockedModels.push(id);equipModel(id);
+  toast('✅ '+m.name+' unlocked!');checkAchs();saveState();if(window.saveCloud)window.saveCloud();renderCollection();
+}
+function equipModel(id){G.equippedModel=id;document.getElementById('room-model-name').textContent=ACS[id].name;saveState();renderCollection();}
+
+/* MINI GAME */
+let mg=null,mgAf=null;
+function showMiniGame(){document.getElementById('minigame-overlay').classList.add('show');document.getElementById('mg-high').textContent=G.mgHigh;document.getElementById('mg-result').classList.remove('show');startMiniGame();}
+function closeMiniGame(){if(mgAf)cancelAnimationFrame(mgAf);document.getElementById('minigame-overlay').classList.remove('show');}
+function startMiniGame(){
+  document.getElementById('mg-result').classList.remove('show');
+  const cv=document.getElementById('mg-canvas');
+  const wp=document.getElementById('mg-canvas-wrap');
+  cv.width=wp.clientWidth;cv.height=wp.clientHeight;
+  mg={score:0,mult:1,mTimer:0,temp:30,zone:{c:50,w:8},zDir:1,zS:0.02,nTimer:0,last:0,run:true};
+  if(mgAf)cancelAnimationFrame(mgAf);mgAf=requestAnimationFrame(mgLoop);
+}
+function mgLoop(ts){
+  if(!mg||!mg.run)return;
+  const dt=Math.min((ts-(mg.last||ts))/1000,0.05);mg.last=ts;
+  const cv=document.getElementById('mg-canvas');const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  mg.zone.c+=mg.zDir*mg.zS*dt*60;
+  if(mg.zone.c>85||mg.zone.c<15)mg.zDir*=-1;
+  mg.nTimer+=dt;if(mg.nTimer>15&&mg.zone.w>3){mg.zone.w=Math.max(3,mg.zone.w-.006*dt*60);mg.nTimer=0;}
+  mg.temp+=(G.outdoorTemp-mg.temp)*.012*dt;mg.temp=Math.max(10,Math.min(50,mg.temp));
+  const tp=(mg.temp-10)/35*100;
+  const zT=mg.zone.c-mg.zone.w/2,zB=mg.zone.c+mg.zone.w/2;
+  const inZ=tp>=zT&&tp<=zB;
+  if(inZ){mg.score+=10*mg.mult*dt;mg.mTimer+=dt;if(mg.mTimer>5&&mg.mult<10)mg.mult=Math.min(10,Math.floor(mg.mTimer/5)+1);}
+  else{mg.score=Math.max(0,mg.score-5*dt);mg.mult=1;mg.mTimer=0;}
+  if(mg.score<=0&&mg.last>1500){mgOver();return;}
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#0D1117';ctx.fillRect(0,0,W,H);
+  const gx=W/2-18,gy=20,gw=36,gh=H-40;
+  ctx.fillStyle='#21262D';ctx.beginPath();ctx.roundRect(gx,gy,gw,gh,16);ctx.fill();
+  const zpT=gy+(zT/100)*gh,zpB=gy+(zB/100)*gh;
+  ctx.fillStyle='rgba(63,185,80,.25)';ctx.fillRect(gx,zpT,gw,zpB-zpT);
+  ctx.strokeStyle='rgba(63,185,80,.6)';ctx.lineWidth=2;ctx.strokeRect(gx,zpT,gw,zpB-zpT);
+  const dy=gy+(tp/100)*gh;
+  ctx.shadowColor=inZ?'#00D4FF':'#EF476F';ctx.shadowBlur=18;
+  ctx.fillStyle=inZ?'#00D4FF':'#EF476F';ctx.beginPath();ctx.arc(gx+gw/2,dy,15,0,Math.PI*2);ctx.fill();
+  ctx.shadowBlur=0;ctx.fillStyle='#E6EDF3';ctx.font='bold 11px monospace';ctx.textAlign='center';
+  ctx.fillText(mg.temp.toFixed(1)+'°C',gx+gw/2,dy+4);
+  ctx.fillStyle='#8B949E';ctx.font='11px sans-serif';ctx.fillText('HOT',W/2,gy+14);ctx.fillText('COLD',W/2,gy+gh-6);
+  ctx.textAlign='left';ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='11px sans-serif';
+  ctx.fillText('ZONE: Keep dot here',gx+gw+10,zpT+10);
+  document.getElementById('mg-score-big').textContent=Math.floor(mg.score);
+  document.getElementById('mg-mult').textContent='×'+mg.mult;
+  mgAf=requestAnimationFrame(mgLoop);
+}
+function mgOver(){if(mgAf)cancelAnimationFrame(mgAf);const sc=Math.floor(mg.score||0);const coins=Math.floor(sc/10);if(sc>G.mgHigh)G.mgHigh=sc;earnCoins(coins,null);document.getElementById('mg-final-score').textContent=sc;document.getElementById('mg-final-coins').textContent='+'+coins+' 🪙';document.getElementById('mg-high').textContent=G.mgHigh;document.getElementById('mg-result').classList.add('show');checkAchs();saveState();}
+function mgAdj(d){if(mg)mg.temp=Math.max(10,Math.min(50,mg.temp+d*3));}
+
+function updateUI(){
+  const t=G.roomTemp;
+  document.getElementById('room-temp-big').textContent=t.toFixed(1);
+  const fr=Math.max(0,Math.min(1,(t-16)/(38-16)));
+  const co=[0,24,37],ho=[42,13,0];
+  const r=Math.round(co[0]+(ho[0]-co[0])*fr),g2=Math.round(co[1]+(ho[1]-co[1])*fr),b=Math.round(co[2]+(ho[2]-co[2])*fr);
+  document.getElementById('room-panel').style.backgroundColor=`rgb(${r},${g2},${b})`;
+  let feel='';if(t<=16)feel='🧊 Freezing';else if(t<=18)feel='🥶 Very Cold';else if(t<=22)feel='😊 Comfortable';else if(t<=26)feel='😌 Warm';else if(t<=30)feel='😅 Hot';else if(t<=35)feel='🥵 Very Hot';else feel='🔥 Extreme Heat';
+  document.getElementById('feels-like').textContent=feel;
+  const w=G.sessionWatts||0;
+  document.getElementById('elec-badge').textContent=G.isPowered?w+'W':'OFF';
+  document.getElementById('stat-watts').textContent=w+'W';
+  document.getElementById('stat-kwh').textContent=G.sessionKwh.toFixed(3);
+  document.getElementById('stat-rating').textContent=getRating();
+}
+function getRating(){const m=ACS[G.equippedModel];if(!G.isPowered)return'—';const r=(G.sessionWatts||0)/m.maxW;return r<.5?'A+++':r<.65?'A++':r<.75?'A+':r<.85?'A':r<.95?'B':'C';}
+function updateTimer(){const m=String(Math.floor(sesSecs/60)).padStart(2,'0'),s=String(sesSecs%60).padStart(2,'0');document.getElementById('stat-time').textContent=m+':'+s;}
+
+function setOutdoorTemp(v){G.outdoorTemp=parseInt(v);document.getElementById('outdoor-temp-label').textContent=v+'°C';saveState();}
+function setRoomSize(v){G.roomSize=v;document.getElementById('room-size-label').textContent=v.charAt(0).toUpperCase()+v.slice(1);saveState();}
+function toggleSfx(){G.sfxOn=!G.sfxOn;document.getElementById('sfx-tog').classList.toggle('on',G.sfxOn);saveState();}
+function confirmReset(){if(confirm('Reset ALL progress?')){localStorage.clear();location.reload();}}
+function exportStats(){const e=Object.keys(G.achievements).length;const txt=`🎮 AC Simulator\n\n💰 Coins: ${G.coins.toLocaleString()}\n🏆 Achievements: ${e}/30\n❄️ Min temp: ${G.minTemp.toFixed(1)}°C\n📊 Sessions: ${G.totalSessions}\n⚡ kWh: ${G.totalKwh.toFixed(2)}\n🎮 Best score: ${G.mgHigh}\n\nInstall: https://malykfarasat.github.io/ac-simulator`;if(navigator.share){navigator.share({title:'AC Simulator',text:txt});G.hasShared=true;checkAchs();}else{navigator.clipboard?.writeText(txt);toast('📋 Stats copied!');}}
+
+let easterTaps=0,easterLast=0;
+function tapLogo(){const now=Date.now();if(now-easterLast>3000)easterTaps=0;easterTaps++;easterLast=now;document.getElementById('easter-count').textContent=easterTaps+'/7';if(easterTaps>=7){easterTaps=0;document.getElementById('easter-count').textContent='✓';if(!G.unlockedModels.includes(11)){G.unlockedModels.push(11);G.foundEgg=true;earnCoins(500,'🧊 CrystalFrost X unlocked!');checkAchs();saveState();renderCollection();}}}
+
+function openTimer(){const m=prompt('Timer (minutes):','60');if(!m)return;const min=parseInt(m);if(isNaN(min)||min<=0)return;document.getElementById('timer-btn').textContent='⏱ '+min+'m';document.getElementById('timer-btn').style.color='var(--amber)';setTimeout(()=>{if(G.isPowered)togglePower();document.getElementById('timer-btn').textContent='⏱ Timer';document.getElementById('timer-btn').style.color='';toast('⏱️ Timer done! AC turned off.');},min*60000);toast('⏱️ Timer set for '+min+' min');}
+
+let dProm=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dProm=e;document.getElementById('install-banner').classList.add('show');});
+function installPWA(){if(dProm){dProm.prompt();dProm.userChoice.then(()=>{dProm=null;});dismissInstall();}else toast('📲 Chrome Menu → Add to Home Screen');}
+function dismissInstall(){document.getElementById('install-banner').classList.remove('show');}
+
+function showTab(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById(id)?.classList.add('active');
+  const m={'game-screen':0,'collection-screen':1,'challenges-screen':2,'ach-screen':3,'settings-screen':4};
+  const btns=document.querySelectorAll('.nav-btn');if(m[id]!=null)btns[m[id]]?.classList.add('on');
+  if(id==='collection-screen')renderCollection();
+  if(id==='ach-screen')renderAchs();
+  if(id==='challenges-screen'){renderChallenges();renderStreak();}
+}
+
+function refreshUI(){updateCoins();updateUI();renderAchs();renderChallenges();renderStreak();renderCollection();}
+
+let cdInt=null;
+function startCountdown(){clearInterval(cdInt);cdInt=setInterval(()=>{const now=new Date();const mid=new Date(now);mid.setHours(24,0,0,0);const d=mid-now;const h=String(Math.floor(d/3600000)).padStart(2,'0'),m=String(Math.floor((d%3600000)/60000)).padStart(2,'0'),s=String(Math.floor((d%60000)/1000)).padStart(2,'0');const el=document.getElementById('ch-countdown');if(el)el.textContent=`${h}:${m}:${s}`;},1000);}
+
+let audioCtx=null;
+function playSound(t){if(!G.sfxOn)return;try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const ctx=audioCtx,o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);const n=ctx.currentTime;if(t==='on'){o.frequency.setValueAtTime(440,n);o.frequency.linearRampToValueAtTime(880,n+.3);g.gain.setValueAtTime(.08,n);g.gain.linearRampToValueAtTime(0,n+.4);o.start(n);o.stop(n+.4);}else if(t==='off'){o.frequency.setValueAtTime(440,n);o.frequency.linearRampToValueAtTime(220,n+.4);g.gain.setValueAtTime(.08,n);g.gain.linearRampToValueAtTime(0,n+.5);o.start(n);o.stop(n+.5);}else{o.frequency.setValueAtTime(800,n);g.gain.setValueAtTime(.04,n);g.gain.linearRampToValueAtTime(0,n+.08);o.start(n);o.stop(n+.1);}}catch(e){}}
+
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+(function init(){
+  loadState();genChallenges();
+  let p=0;const bar=document.getElementById('splash-bar');
+  const si=setInterval(()=>{p+=2.5;bar.style.width=p+'%';if(p>=100){clearInterval(si);setTimeout(()=>{document.getElementById('splash').classList.add('hide');setTimeout(()=>{document.getElementById('splash').style.display='none';},600);},300);}},50);
+  updateUI();updateCoins();renderAchs();renderChallenges();renderStreak();renderCollection();startCountdown();
+  document.getElementById('outdoor-temp-select').value=G.outdoorTemp;
+  document.getElementById('outdoor-temp-label').textContent=G.outdoorTemp+'°C';
+  document.getElementById('sfx-tog').classList.toggle('on',G.sfxOn!==false);
+})();
+</script>
+</body>
+</html>

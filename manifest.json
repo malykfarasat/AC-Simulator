@@ -1,0 +1,54 @@
+{
+  "name": "AC Simulator - Cool Your World",
+  "short_name": "AC Simulator",
+  "description": "The ultimate AC simulator game. Cool your room, collect 12 AC models, earn coins!",
+  "start_url": "/ac-simulator/",
+  "scope": "/ac-simulator/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0D1117",
+  "background_color": "#0D1117",
+  "lang": "en",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/game.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Game Screen"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Play Game",
+      "short_name": "Play",
+      "description": "Jump straight to the game",
+      "url": "/ac-simulator/#game",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "AC Collection",
+      "short_name": "Collection",
+      "description": "View your AC models",
+      "url": "/ac-simulator/#collection",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
