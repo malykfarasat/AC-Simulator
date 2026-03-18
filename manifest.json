@@ -1,8 +1,8 @@
 {
   "name": "AC Simulator - Cool Your World",
   "short_name": "AC Simulator",
-  "description": "Realistic AC simulator game. Cool rooms, collect 12 ACs, earn coins, complete challenges!",
-  "start_url": "./",
+  "description": "Realistic AC simulator game. Cool rooms, collect 12 AC models, earn coins, complete challenges!",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -11,17 +11,55 @@
   "lang": "en",
   "categories": ["games", "entertainment"],
   "icons": [
-    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"maskable"},
-    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
-    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
-  ],
-  "shortcuts": [
-    {"name":"Play Game","short_name":"Play","url":"./","icons":[{"src":"icons/icon-192.png","sizes":"192x192"}]},
-    {"name":"AC Collection","short_name":"Collection","url":"./#collection","icons":[{"src":"icons/icon-192.png","sizes":"192x192"}]}
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "screenshots": [
-    {"src":"screenshots/game.png","sizes":"390x844","type":"image/png","form_factor":"narrow","label":"Game — Cool your room"}
+    {
+      "src": "screenshots/game.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Game Screen — Cool your room"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Play Game",
+      "short_name": "Play",
+      "description": "Open AC Simulator",
+      "url": "./index.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "AC Collection",
+      "short_name": "Collection",
+      "description": "View your AC models",
+      "url": "./index.html#col",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
   ],
   "prefer_related_applications": false,
   "related_applications": []
