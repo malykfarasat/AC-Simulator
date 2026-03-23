@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#050508" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AC Simulator" />
+    
+    <!-- SEO & Social -->
+    <meta name="description" content="AC Simulator - The ultimate air conditioning simulation game. Control your virtual AC, unlock models, complete challenges, and cool your world!" />
+    <meta name="keywords" content="AC Simulator, air conditioner, simulation game, mobile game, cooling game" />
+    <meta name="author" content="AC Simulator Team" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="AC Simulator - Cool Your World" />
+    <meta property="og:description" content="The ultimate air conditioning simulation game. Control your virtual AC and cool your world!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./icon-512.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AC Simulator - Cool Your World" />
+    <meta name="twitter:description" content="The ultimate air conditioning simulation game. Control your virtual AC and cool your world!" />
+    <meta name="twitter:image" content="./icon-512.png" />
+    
+    <!-- PWA -->
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png" />
+    
+    <!-- Preconnect for fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <title>AC Simulator ❄️ Cool Your World</title>
+    
+    <style>
+      /* Critical CSS for fast initial render */
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html, body, #root {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #050508;
+        color: #fff;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      /* Prevent FOUC */
+      .loading {
+        opacity: 0;
+        animation: fadeIn 0.3s ease forwards;
+      }
+      @keyframes fadeIn {
+        to { opacity: 1; }
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-CtOzRnzj.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/vendor-Cgg2GOmP.js">
+    <link rel="modulepreload" crossorigin href="./assets/ui-BmX5_hMb.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-BipCTLy3.css">
+  </head>
+  <body>
+    <div id="root" class="loading"></div>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('[SW] Registered'))
+            .catch(err => console.log('[SW] Registration failed:', err));
+        });
+      }
+    </script>
+  </body>
+</html>
